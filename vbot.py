@@ -14,40 +14,21 @@ import speech_recognition as sr
 import functools
 import typing
 
-#from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import ProcessPoolExecutor
 
 openai.api_key = "TOKEN"
 
-
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
-#Guild = client.get_guild(id)
 voiceChannel: VoiceChannel
 
-mess = ''
-
-#asyncio.set_event_loop(asyncio.new_event_loop())
 
 @client.event
 async def on_ready():
     print(f'{client.user} がログインしました')
     global mess
-#    background_task.start(mess)
 
-#@client.event
-#async def on_message(message):
-#    if message.content == '!join' and message.author.voice:
-#        # ユーザーが接続しているボイスチャンネルに接続する
-#        channel = message.author.voice.channel
-#        voice = await channel.connect()
-
-#def to_thread(func: typing.Callable) -> typing.Coroutine:
-#    @functools.wraps(func)
-#    async def wrapper(*args, **kwargs):
-#        return await asyncio.to_thread(func, *args, **kwargs)
-#    return wrapper
 
 def to_thread(func: typing.Callable) -> typing.Coroutine:
     @functools.wraps(func)
@@ -87,15 +68,11 @@ async def listen_async(self, source):
 #@to_thread
 @tasks.loop(seconds=3)
 async def background_task(message):
-#    while True:
-#        audio = input_voice()
     r = sr.Recognizer()
     m = sr.Microphone()
-#    audio_data = 0
     with sr.Microphone(sample_rate=16_000) as source:
         print("input start")
         audio = await listen_async(r, m);
-#        audio = await r.listen(source)
         print("input end")
 
     audio_data = BytesIO(audio.get_wav_data())
@@ -112,12 +89,7 @@ async def background_task(message):
         while message.guild.voice_client.is_playing():
             await asyncio.sleep(0.3)
         message.guild.voice_client.play(discord.FFmpegPCMAudio("vox_tmp.wav"))
-#    await asyncio.sleep(2)
 
-#            await asyncio.sleep(3)
-#        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio("example.mp3"), volume=1)
-#        source = FFmpegPCMAudio('./tmp.wav')
-#        player = voice.play(source)
 
 @client.event
 async def on_message(message):
@@ -130,25 +102,13 @@ async def on_message(message):
             await background_task.cancel();
             return
         await message.author.voice.channel.connect()
-#        await VoiceChannel.connect(message.author.voice.channel)
 
         await message.channel.send('接続しました。')
         await message.guild.voice_client.move_to(message.author.voice.channel)
         await message.reply('Joined the voice channel!')
-#        with ThreadPoolExecutor(max_workers=2) as executor:
-#        with ProcessPoolExecutor(max_workers=2) as executor:
-#            executor.submit(background_task(message))
-#            executor.submit(main())
         global mess
         mess = message
-#        await background_task(message);
-#        async def to_thread(func, /, *args, **kwargs):
-#            loop = asyncio.get_running_loop()
-#            ctx = contextvars.copy_context()
-#            func_call = functools.partial(ctx.run, background_task, *args, **kwargs)
-#            return await loop.run_in_executor(None, background_task(message))
         background_task.start(message);
-#        await client.loop.create_task(background_task(message))
 
 
     elif message.content == "!exit":
@@ -169,20 +129,4 @@ async def on_message(message):
         await asyncio.sleep(60)
         print('Background task running...')
 
-#loop = asyncio.get_event_loop()
-#loop.create_task(client.run('DISCORD_TOKEN'))#, log_handler=None)
-#loop.create_task()
-#loop.run_forever(background_task())
 client.run('DISCORD_TOKEN')#, log_handler=None)
-
-#async def main():
-#    global mess
-#    # do other async things
-#    if audio = input_voice():
-#        await background_task(mess, audio)
-
-    # start the client
-#    async with client:
-#        await client.start('DISCORD_TOKEN')#, log_handler=None))
-
-#asyncio.run(main())
